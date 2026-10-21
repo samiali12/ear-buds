@@ -12,7 +12,7 @@ import {
   TURNTABLE_VELOCITY_DECAY,
   TURNTABLE_MIN_VELOCITY,
   SHADOW_OPACITY_ASSEMBLED,
-  EASE_LUXURY_CSS,
+  EASE_LUXURY,
 } from "@/lib/motion";
 
 const FRAME_PATH = "/spin/spin_";
@@ -416,7 +416,7 @@ export default function Turntable() {
           className="headline headline--section"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: EASE_LUXURY_CSS }}
+          transition={{ duration: 0.8, ease: EASE_LUXURY }}
           viewport={{ once: true }}
         >
           Hold it. <em className="headline-italic-gold">Turn it.</em>
@@ -426,7 +426,7 @@ export default function Turntable() {
           style={{ color: "var(--text-muted)" }}
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: EASE_LUXURY_CSS, delay: 0.1 }}
+          transition={{ duration: 0.8, ease: EASE_LUXURY, delay: 0.1 }}
           viewport={{ once: true }}
         >
           Every angle, crafted to captivate.

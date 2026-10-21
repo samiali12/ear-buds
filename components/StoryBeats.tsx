@@ -56,34 +56,6 @@ function BeatBlock({
   );
 
   // Perspective transforms for entry
-  const rotateY = useTransform(
-    progress,
-    [start, start + 0.05],
-    [TEXT_ROTATE_Y_ENTER, 0]
-  );
-  const translateZ = useTransform(
-    progress,
-    [start, start + 0.05],
-    [TEXT_TRANSLATE_Z_ENTER, 0]
-  );
-
-  // Perspective transforms for exit
-  const rotateYExit = useTransform(
-    progress,
-    [end - 0.05, end],
-    [0, -TEXT_ROTATE_Y_ENTER]
-  );
-  const translateZExit = useTransform(
-    progress,
-    [end - 0.05, end],
-    [0, TEXT_TRANSLATE_Z_ENTER * 0.5]
-  );
-
-  const revealed = useBeatReveal(opacity);
-  const isRight = beat.align === "right";
-  const { before, accent, after } = parseHeadline(beat.headline);
-
-  // Determine which rotation to use based on position in scroll
   const currentRotateY = useTransform(
     progress,
     [start, start + 0.05, end - 0.05, end],
@@ -94,6 +66,10 @@ function BeatBlock({
     [start, start + 0.05, end - 0.05, end],
     [TEXT_TRANSLATE_Z_ENTER, 0, 0, TEXT_TRANSLATE_Z_ENTER * 0.5]
   );
+
+  const revealed = useBeatReveal(opacity);
+  const isRight = beat.align === "right";
+  const { before, accent, after } = parseHeadline(beat.headline);
 
   return (
     <motion.div

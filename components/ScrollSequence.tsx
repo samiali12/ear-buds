@@ -232,16 +232,34 @@ export default function ScrollSequence({ ready = false }: ScrollSequenceProps) {
   // DEPTH OF FIELD - BOKEH
   // =====================
 
+  // Deterministic per-index noise. Randomness during render would be
+  // evaluated at build time and would not match the client. Values are
+  // rounded so the server and the client serialise them identically.
   const bokehElements = useMemo(() => {
     if (prefersReducedMotion) return [];
+
+    const noise = (index: number, salt: number) => {
+      const value = Math.sin(index * 12.9898 + salt * 78.233) * 43758.5453;
+      return value - Math.floor(value);
+    };
+
+    const round = (value: number) => Math.round(value * 10000) / 10000;
+
     return Array.from({ length: BOKEH_COUNT }, (_, i) => ({
       id: i,
-      size: BOKEH_MIN_SIZE + Math.random() * (BOKEH_MAX_SIZE - BOKEH_MIN_SIZE),
-      blur: BOKEH_MIN_BLUR + Math.random() * (BOKEH_MAX_BLUR - BOKEH_MIN_BLUR),
-      opacity: BOKEH_MIN_OPACITY + Math.random() * (BOKEH_MAX_OPACITY - BOKEH_MIN_OPACITY),
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      delay: Math.random() * 2,
+      size: round(
+        BOKEH_MIN_SIZE + noise(i, 1) * (BOKEH_MAX_SIZE - BOKEH_MIN_SIZE)
+      ),
+      blur: round(
+        BOKEH_MIN_BLUR + noise(i, 2) * (BOKEH_MAX_BLUR - BOKEH_MIN_BLUR)
+      ),
+      opacity: round(
+        BOKEH_MIN_OPACITY +
+          noise(i, 3) * (BOKEH_MAX_OPACITY - BOKEH_MIN_OPACITY)
+      ),
+      x: round(noise(i, 4) * 100),
+      y: round(noise(i, 5) * 100),
+      delay: round(noise(i, 6) * 2),
     }));
   }, [prefersReducedMotion]);
 
@@ -542,7 +560,6 @@ export default function ScrollSequence({ ready = false }: ScrollSequenceProps) {
             <motion.div
               className="pointer-events-none absolute left-1/2 top-1/2 w-full -translate-x-1/2"
               style={{
-                y: `calc(50% + ${REFLECTION_OFFSET_Y}px)`,
                 x: reflectionX,
                 y: reflectionY,
               }}
@@ -551,6 +568,7 @@ export default function ScrollSequence({ ready = false }: ScrollSequenceProps) {
                 ref={reflectionCanvasRef}
                 className="mx-auto max-w-[80%] opacity-[0.12]"
                 style={{
+                  marginTop: REFLECTION_OFFSET_Y,
                   filter: `blur(${REFLECTION_BLUR}px)`,
                   maskImage: "linear-gradient(to bottom, transparent, black 30%)",
                   WebkitMaskImage: "linear-gradient(to bottom, transparent, black 30%)",

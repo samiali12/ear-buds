@@ -5,7 +5,7 @@ import Navbar from "@/components/Navbar";
 import Loader from "@/components/Loader";
 import ScrollSequence from "@/components/ScrollSequence";
 import Turntable from "@/components/Turntable";
-import Features from "@/components/Features";
+import TechnologySection3D from "@/components/TechnologySection3D";
 import Specs from "@/components/Specs";
 import FinalCTA from "@/components/FinalCTA";
 import Footer from "@/components/Footer";
@@ -29,7 +29,7 @@ export default function Home() {
       <main style={{ background: "var(--bg)" }}>
         <ScrollSequence ready={ready} />
         <Turntable />
-        <Features />
+        <TechnologySection3D />
         <Specs />
         <FinalCTA />
         <Footer />
