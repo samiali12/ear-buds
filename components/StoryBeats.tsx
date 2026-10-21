@@ -9,17 +9,11 @@ import {
 } from "framer-motion";
 import { BEATS, parseHeadline, type Beat } from "@/lib/story";
 import { PRODUCT_NAME, TAGLINE, EASE } from "@/lib/config";
-import {
-  TEXT_ROTATE_Y_ENTER,
-  TEXT_TRANSLATE_Z_ENTER,
-  EASE_LUXURY_CSS,
-} from "@/lib/motion";
 import { MaskedLine } from "./Reveal";
 import Eyebrow from "./Eyebrow";
 import OutlineButton from "./Button";
 
 /**
- * Story beats with masked reveal.
  * The masked reveal starts once the beat is genuinely on screen and resets
  * only when it has faded out of sight.
  */
@@ -37,34 +31,12 @@ function useBeatReveal(opacity: MotionValue<number>) {
   return revealed;
 }
 
-function BeatBlock({
-  beat,
-  progress,
-  ready,
-  textParallaxX,
-}: {
-  beat: Beat;
-  progress: MotionValue<number>;
-  ready: boolean;
-  textParallaxX?: MotionValue<number>;
-}) {
+function BeatBlock({ beat, progress }: { beat: Beat; progress: MotionValue<number> }) {
   const [start, end] = beat.range;
   const opacity = useTransform(
     progress,
-    [start, start + 0.035, end - 0.035, end],
+    [start, start + 0.03, end - 0.03, end],
     [0, 1, 1, 0]
-  );
-
-  // Perspective transforms for entry
-  const currentRotateY = useTransform(
-    progress,
-    [start, start + 0.05, end - 0.05, end],
-    [TEXT_ROTATE_Y_ENTER, 0, 0, -TEXT_ROTATE_Y_ENTER]
-  );
-  const currentTranslateZ = useTransform(
-    progress,
-    [start, start + 0.05, end - 0.05, end],
-    [TEXT_TRANSLATE_Z_ENTER, 0, 0, TEXT_TRANSLATE_Z_ENTER * 0.5]
   );
 
   const revealed = useBeatReveal(opacity);
@@ -74,26 +46,20 @@ function BeatBlock({
   return (
     <motion.div
       className={[
-        "absolute inset-x-6 bottom-[7vh]",
-        "md:inset-x-auto md:bottom-auto md:top-1/2 md:-translate-y-1/2",
-        isRight ? "md:left-auto md:right-[8vw]" : "md:left-[8vw] md:right-auto",
+        "absolute inset-0 flex flex-col justify-end",
+        "px-[max(24px,env(safe-area-inset-left))]",
+        "pb-[max(20px,env(safe-area-inset-bottom))]",
+        "md:px-[8vw] md:pb-12",
       ].join(" ")}
-      style={{
-        opacity,
-        x: textParallaxX,
-        transformStyle: "preserve-3d",
-      }}
+      style={{ opacity }}
     >
-      <motion.div
+      <div
         className={[
-          "w-full md:w-[30ch]",
-          isRight ? "md:ml-auto md:text-right" : "",
+          "w-full",
+          isRight
+            ? "md:ml-auto md:max-w-[34ch] md:text-right"
+            : "md:max-w-[34ch]",
         ].join(" ")}
-        style={{
-          rotateY: currentRotateY,
-          translateZ: currentTranslateZ,
-          transformStyle: "preserve-3d",
-        }}
       >
         <Eyebrow
           chapter={beat.chapter}
@@ -102,7 +68,7 @@ function BeatBlock({
           active={revealed}
         />
 
-        <MaskedLine active={revealed} delay={0.08} className="mt-7 md:mt-9">
+        <MaskedLine active={revealed} delay={0.08} className="mt-5 md:mt-7">
           <h2 className="headline headline--beat">
             {before}
             <em className="headline-italic-gold">{accent}</em>
@@ -110,12 +76,12 @@ function BeatBlock({
           </h2>
         </MaskedLine>
 
-        <MaskedLine active={revealed} delay={0.16} className="mt-6 md:mt-7">
+        <MaskedLine active={revealed} delay={0.16} className="mt-4 md:mt-5">
           <p className="body-text">{beat.body}</p>
         </MaskedLine>
 
         {beat.id === "experience" ? (
-          <MaskedLine active={revealed} delay={0.24} className="mt-9 md:mt-11">
+          <MaskedLine active={revealed} delay={0.24} className="mt-6 md:mt-8">
             <div className="pointer-events-auto">
               <OutlineButton href="#buy" size="sm">
                 Pre-order {PRODUCT_NAME}
@@ -123,7 +89,7 @@ function BeatBlock({
             </div>
           </MaskedLine>
         ) : null}
-      </motion.div>
+      </div>
     </motion.div>
   );
 }
@@ -131,50 +97,42 @@ function BeatBlock({
 export default function StoryBeats({
   progress,
   ready,
-  textParallaxX,
 }: {
   progress: MotionValue<number>;
   ready: boolean;
-  textParallaxX?: MotionValue<number>;
 }) {
   const heroOpacity = useTransform(progress, [0, 0.07, 0.11], [1, 1, 0]);
 
-  // Hero text perspective transforms - reduced for sharper text
-  const heroRotateY = useTransform(progress, [0, 0.05], [1.5, 0]);
-
   return (
-    <div className="pointer-events-none absolute inset-0">
+    /*
+     * The type band. It is a sibling of the stage, holds no transform, and
+     * is the topmost layer of the sequence, so every glyph is crisp and no
+     * copy ever crosses the product.
+     */
+    <div className="type-band z-20">
       {/* Hero */}
       <motion.div
-        className="absolute inset-0 flex flex-col items-center justify-center px-[8vw]"
-        style={{
-          opacity: heroOpacity,
-        }}
+        className="absolute inset-0 flex flex-col justify-end px-[max(24px,env(safe-area-inset-left))] pb-[max(20px,env(safe-area-inset-bottom))] md:px-[8vw] md:pb-12"
+        style={{ opacity: heroOpacity }}
       >
-        <motion.div
-          className="text-center"
-          style={{
-            rotateY: heroRotateY,
-            backfaceVisibility: "hidden" as const,
-          }}
-        >
+        <div className="text-left">
           <MaskedLine active={ready} delay={0}>
             <h1 className="headline">{PRODUCT_NAME}</h1>
           </MaskedLine>
-          <MaskedLine active={ready} delay={0.12} className="mt-6 md:mt-8">
+          <MaskedLine active={ready} delay={0.12} className="mt-4 md:mt-5">
             <p
-              className="font-serif text-xl italic md:text-2xl"
+              className="font-serif text-lg italic md:text-xl"
               style={{ color: "var(--text-muted)" }}
             >
               {TAGLINE}
             </p>
           </MaskedLine>
-        </motion.div>
+        </div>
 
         {/* Scroll indicator */}
-        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 md:bottom-16">
+        <div className="pointer-events-none absolute bottom-6 left-1/2 hidden -translate-x-1/2 md:block">
           <motion.div
-            className="h-12 w-px origin-top md:h-16"
+            className="h-14 w-px origin-top"
             style={{ background: "var(--gold)", opacity: 0.5 }}
             initial={{ scaleY: 0 }}
             animate={ready ? { scaleY: 1 } : { scaleY: 0 }}
@@ -185,13 +143,7 @@ export default function StoryBeats({
 
       {/* Chaptered beats */}
       {BEATS.map((beat) => (
-        <BeatBlock
-          key={beat.id}
-          beat={beat}
-          progress={progress}
-          ready={ready}
-          textParallaxX={textParallaxX}
-        />
+        <BeatBlock key={beat.id} beat={beat} progress={progress} />
       ))}
     </div>
   );

@@ -1,7 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import {
+  AnimatePresence,
+  motion,
+  useMotionValue,
+  useTransform,
+} from "framer-motion";
 import {
   EASE,
   FRAME_COUNT,
@@ -20,14 +25,12 @@ interface LoaderProps {
  * gold fills as the frames arrive, then the whole thing fades away.
  */
 export default function Loader({ onLoaded }: LoaderProps) {
-  const [progress, setProgress] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
+  const progress = useMotionValue(0);
+  const width = useTransform(progress, (value) => `${value * 100}%`);
 
-  const preloadFrames = useCallback(async () => {
-    const isMobile =
-      typeof window !== "undefined" &&
-      window.innerWidth < MOBILE_BREAKPOINT;
-    const framePath = isMobile ? FRAME_PATH_MOBILE : FRAME_PATH;
+  useEffect(() => {
+    let cancelled = false;
 
     const preloadImage = (src: string): Promise<void> => {
       return new Promise((resolve) => {
@@ -38,27 +41,45 @@ export default function Loader({ onLoaded }: LoaderProps) {
       });
     };
 
-    const sources = Array.from(
-      { length: FRAME_COUNT },
-      (_, i) => `${framePath}${String(i + 1).padStart(3, "0")}.webp`
-    );
+    const preloadFrames = async () => {
+      const isMobile = window.innerWidth < MOBILE_BREAKPOINT;
+      const framePath = isMobile ? FRAME_PATH_MOBILE : FRAME_PATH;
 
-    const batchSize = 16;
-    let loaded = 0;
+      const sources = Array.from(
+        { length: FRAME_COUNT },
+        (_, i) => `${framePath}${String(i + 1).padStart(3, "0")}.webp`
+      );
 
-    for (let i = 0; i < sources.length; i += batchSize) {
-      const batch = sources.slice(i, i + batchSize);
-      await Promise.all(batch.map((src) => preloadImage(src)));
-      loaded += batch.length;
-      setProgress(loaded / FRAME_COUNT);
-    }
+      // The opening frames carry the first impression, so they are awaited.
+      // The rest are warmed in the background and never hold the page up.
+      const opening = sources.slice(0, 12);
+      const rest = sources.slice(12);
 
-    setIsComplete(true);
-  }, []);
+      await Promise.all(opening.map((src) => preloadImage(src)));
+      if (cancelled) return;
+      progress.set(opening.length / FRAME_COUNT);
 
-  useEffect(() => {
-    preloadFrames();
-  }, [preloadFrames]);
+      const batchSize = 24;
+      let loaded = opening.length;
+
+      for (let i = 0; i < rest.length; i += batchSize) {
+        const batch = rest.slice(i, i + batchSize);
+        await Promise.all(batch.map((src) => preloadImage(src)));
+        if (cancelled) return;
+
+        loaded += batch.length;
+        progress.set(loaded / FRAME_COUNT);
+      }
+    };
+
+    preloadFrames().then(() => {
+      if (!cancelled) setIsComplete(true);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [progress]);
 
   return (
     <AnimatePresence onExitComplete={onLoaded}>
@@ -91,10 +112,7 @@ export default function Loader({ onLoaded }: LoaderProps) {
           >
             <motion.div
               className="absolute inset-y-0 left-0"
-              style={{ background: "var(--gold)" }}
-              initial={{ width: "0%" }}
-              animate={{ width: `${progress * 100}%` }}
-              transition={{ duration: 0.5, ease: EASE }}
+              style={{ background: "var(--gold)", width }}
             />
           </div>
         </motion.div>

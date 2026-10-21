@@ -8,7 +8,7 @@ import OutlineButton, { Anchor } from "./Button";
 const navLinks = [
   { href: "#overview", label: "Overview" },
   { href: "#technology", label: "Technology" },
-  { href: "#specs", label: "Specs" },
+  { href: "#specs", label: "Measurements" },
   { href: "#buy", label: "Buy" },
 ];
 
@@ -26,10 +26,21 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Lock the page while the menu is open, and close on Escape
   useEffect(() => {
-    document.body.style.overflow = isMobileMenuOpen ? "hidden" : "";
+    if (!isMobileMenuOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsMobileMenuOpen(false);
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
     };
   }, [isMobileMenuOpen]);
 
@@ -37,12 +48,12 @@ export default function Navbar() {
     <>
       <header className="fixed inset-x-0 top-0 z-40">
         <div
-          className="flex h-[72px] items-center justify-between px-[8vw] transition-colors duration-500"
+          className="flex h-[64px] items-center justify-between px-[max(20px,env(safe-area-inset-left))] pt-[env(safe-area-inset-top)] md:h-[76px] md:px-[8vw]"
           style={{
             background: isScrolled ? "var(--bg-veil)" : "transparent",
-            backdropFilter: isScrolled ? "blur(14px)" : "none",
-            WebkitBackdropFilter: isScrolled ? "blur(14px)" : "none",
             borderBottom: `1px solid ${isScrolled ? "var(--line)" : "transparent"}`,
+            transition:
+              "background-color 500ms var(--ease), border-color 500ms var(--ease)",
           }}
         >
           {/* Wordmark */}
@@ -70,10 +81,11 @@ export default function Navbar() {
 
           {/* Menu toggle — hairline strokes only */}
           <button
-            className="flex h-10 w-10 items-center justify-center md:hidden"
+            className="-mr-2 flex h-11 w-11 items-center justify-center md:hidden"
             onClick={() => setIsMobileMenuOpen((open) => !open)}
             aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
             aria-expanded={isMobileMenuOpen}
+            aria-controls="mobile-menu"
             style={{ color: "var(--ivory)" }}
           >
             <svg
@@ -98,28 +110,29 @@ export default function Navbar() {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
+            id="mobile-menu"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5, ease: EASE }}
-            className="fixed inset-0 z-30 flex flex-col justify-between px-[8vw] pb-14 pt-28 md:hidden"
+            className="fixed inset-0 z-30 flex flex-col justify-between px-[max(20px,env(safe-area-inset-left))] pb-[max(28px,env(safe-area-inset-bottom))] pt-[calc(64px+env(safe-area-inset-top)+32px)] md:hidden"
             style={{ background: "var(--bg)" }}
           >
-            <nav className="flex flex-col gap-8">
+            <nav className="flex flex-col">
               {navLinks.map((link, index) => (
                 <motion.div
                   key={link.href}
-                  initial={{ opacity: 0, y: 14 }}
+                  initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{
                     duration: 0.9,
                     ease: EASE,
-                    delay: 0.12 + index * 0.07,
+                    delay: 0.1 + index * 0.06,
                   }}
                 >
                   <Anchor
                     href={link.href}
-                    className="font-serif text-4xl"
+                    className="block border-b border-line py-5 font-serif text-[2rem] leading-tight"
                     style={{ color: "var(--ivory)" }}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
@@ -129,13 +142,13 @@ export default function Navbar() {
               ))}
             </nav>
 
-            <div>
+            <div className="pt-10">
               <OutlineButton
                 href="#buy"
-                size="sm"
+                className="w-full"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                Pre-order
+                Pre-order {PRODUCT_NAME}
               </OutlineButton>
             </div>
           </motion.div>

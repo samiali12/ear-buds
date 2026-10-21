@@ -15,10 +15,10 @@ export default function FinalCTA() {
     <section
       id="buy"
       ref={ref}
-      className="px-[8vw] py-[22vh] text-center"
+      className="px-[8vw] py-[18vh] text-center"
       style={{ background: "var(--bg)" }}
     >
-      <div className="mx-auto max-w-4xl">
+      <div className="mx-auto max-w-3xl">
         <div className="flex justify-center">
           <Eyebrow label="Available now" className="items-center" />
         </div>
@@ -36,7 +36,15 @@ export default function FinalCTA() {
         </MaskedLine>
 
         <MaskedLine active={inView} delay={0.24} className="mt-12 md:mt-16">
-          <OutlineButton href="#overview">Pre-order {PRODUCT_NAME}</OutlineButton>
+          <OutlineButton href="#overview" className="btn-outline--regal">
+            Pre-order {PRODUCT_NAME}
+          </OutlineButton>
+        </MaskedLine>
+
+        <MaskedLine active={inView} delay={0.32} className="mt-16 md:mt-24">
+          <div className="ornament">
+            <span className="ornament__mark" aria-hidden="true" />
+          </div>
         </MaskedLine>
       </div>
     </section>

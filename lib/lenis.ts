@@ -8,6 +8,11 @@ let instance: Lenis | null = null;
 /** Registers the live Lenis instance so anchors can be routed through it. */
 export function setLenis(next: Lenis | null) {
   instance = next;
+
+  // Handy handle for debugging and for driving the page from a test harness.
+  if (typeof window !== "undefined") {
+    (window as unknown as { __lenis?: Lenis }).__lenis = next ?? undefined;
+  }
 }
 
 export function getLenis() {

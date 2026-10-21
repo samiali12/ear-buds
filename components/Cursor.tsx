@@ -1,20 +1,30 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
+
+const QUERY = "(pointer: fine)";
+
+function subscribe(callback: () => void) {
+  const media = window.matchMedia(QUERY);
+  media.addEventListener("change", callback);
+  return () => media.removeEventListener("change", callback);
+}
+
+function getSnapshot() {
+  return window.matchMedia(QUERY).matches;
+}
 
 /**
  * A 10px hairline ring that follows the pointer on desktop only.
  */
 export default function Cursor() {
-  const [enabled, setEnabled] = useState(false);
+  const isFinePointer = useSyncExternalStore(subscribe, getSnapshot, () => false);
   const [active, setActive] = useState(false);
   const [position, setPosition] = useState({ x: -100, y: -100 });
 
   useEffect(() => {
-    const fine = window.matchMedia("(pointer: fine)");
-    if (!fine.matches) return;
+    if (!isFinePointer) return;
 
-    setEnabled(true);
     document.documentElement.classList.add("has-custom-cursor");
 
     const handleMove = (event: MouseEvent) => {
@@ -38,9 +48,9 @@ export default function Cursor() {
       window.removeEventListener("mouseover", handleOver);
       document.documentElement.classList.remove("has-custom-cursor");
     };
-  }, []);
+  }, [isFinePointer]);
 
-  if (!enabled) return null;
+  if (!isFinePointer) return null;
 
   return (
     <div

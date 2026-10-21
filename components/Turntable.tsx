@@ -51,27 +51,6 @@ export default function Turntable() {
     };
   }, []);
 
-  // Load frames when section is near viewport
-  useEffect(() => {
-    if (spinFramesExist === false || prefersReducedMotion) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && !framesLoaded) {
-          loadFrames();
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, [spinFramesExist, framesLoaded, prefersReducedMotion]);
-
   const loadFrames = useCallback(() => {
     const frames: HTMLImageElement[] = [];
 
@@ -96,6 +75,27 @@ export default function Turntable() {
       }
     });
   }, []);
+
+  // Load frames when section is near viewport
+  useEffect(() => {
+    if (spinFramesExist === false || prefersReducedMotion) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !framesLoaded) {
+          loadFrames();
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [spinFramesExist, framesLoaded, prefersReducedMotion, loadFrames]);
 
   // Draw frame to main canvas
   const drawFrame = useCallback((frameIndex: number) => {
@@ -216,7 +216,9 @@ export default function Turntable() {
           drawFrame(frameIndex);
           drawReflection(frameIndex);
 
-          velocity.set(currentVelocity * TURNTABLE_VELOCITY_DECAY);
+          velocity.set(
+            currentVelocity * Math.pow(TURNTABLE_VELOCITY_DECAY, delta)
+          );
         }
       }
 
@@ -448,7 +450,7 @@ export default function Turntable() {
         aria-label="360 degree product viewer"
         aria-valuemin={0}
         aria-valuemax={SPIN_FRAME_COUNT - 1}
-        aria-valuenow={Math.floor(currentFrameRef.current)}
+        aria-valuenow={0}
       >
         {/* Reflection */}
         <div className="pointer-events-none absolute left-1/2 top-1/2 w-full -translate-x-1/2">

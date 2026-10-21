@@ -25,8 +25,27 @@ export const FRAME_DAMPING = 0.07;
 /* Breakpoints */
 export const MOBILE_BREAKPOINT = 768;
 
-/* Height of the scroll sequence, in viewport heights */
+/* Height of the scroll sequence, in viewport heights (see --sequence-height) */
 export const SCROLL_HEIGHT_MULTIPLIER = 450;
+
+/**
+ * The share of the stage kept free for type. The product is drawn into the
+ * remaining area, so a line of copy can never land on the earbuds.
+ */
+export const STAGE_BAND_DESKTOP = 0.3;
+export const STAGE_BAND_MOBILE = 0.36;
+
+/** The strip of the stage kept clear for the navigation bar. */
+export const STAGE_TOP_DESKTOP = 76;
+export const STAGE_TOP_MOBILE = 64;
+
+/**
+ * Where the product sits inside a frame, as a fraction of the frame height.
+ * The widest extent is used so that the earbuds are never cropped, whatever
+ * the frame does.
+ */
+export const FRAME_PRODUCT_TOP = 0.03;
+export const FRAME_PRODUCT_BOTTOM = 0.94;
 
 /* Motion */
 export const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];

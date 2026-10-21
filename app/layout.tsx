@@ -17,12 +17,21 @@ const cormorant = Cormorant_Garamond({
   display: "swap",
 });
 
+const TITLE = "Aurum Buds Pro | Sound, in gold.";
+const DESCRIPTION =
+  "Flagship wireless audio, re-engineered for a world that never stops.";
+
 export const metadata: Metadata = {
-  title: "Aurum Buds Pro | Sound, in gold.",
-  description: "Flagship wireless audio, re-engineered for a world that never stops.",
+  metadataBase: new URL("https://aurumbudspro.example.com"),
+  title: TITLE,
+  description: DESCRIPTION,
+  icons: {
+    icon: [{ url: "/hero.webp", type: "image/webp" }],
+    apple: [{ url: "/hero.webp", type: "image/webp" }],
+  },
   openGraph: {
-    title: "Aurum Buds Pro | Sound, in gold.",
-    description: "Flagship wireless audio, re-engineered for a world that never stops.",
+    title: TITLE,
+    description: DESCRIPTION,
     type: "website",
     images: [
       {
@@ -32,6 +41,12 @@ export const metadata: Metadata = {
         alt: "Aurum Buds Pro - Premium Wireless Earbuds",
       },
     ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+    images: ["/hero.webp"],
   },
 };
 
