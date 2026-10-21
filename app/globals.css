@@ -1,26 +1,417 @@
 @import "tailwindcss";
 
+/* ==========================================================================
+   TOKENS — single source of truth.
+   Every colour, typeface and rhythm value in the product resolves from here.
+   Nothing outside this file may introduce a raw colour value.
+   ========================================================================== */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Surfaces — --bg is the exact hex sampled from the rendered frames */
+  --bg: #010101;
+  --bg-2: #0b0a09;
+
+  /* Ivory — headings and primary text */
+  --ivory: #f2ede4;
+  --text: var(--ivory);
+  --text-muted: rgb(242 237 228 / 0.55);
+
+  /* Muted champagne gold — accents only */
+  --gold: #c9a96a;
+  --gold-light: #e6d3a8;
+  --gold-deep: #8f7440;
+  --gold-muted: rgb(201 169 106 / 0.55);
+  --gold-40: rgb(201 169 106 / 0.4);
+
+  /* Hairlines */
+  --line: rgb(201 169 106 / 0.18);
+  --line-soft: rgb(242 237 228 / 0.08);
+  --line-track: rgb(201 169 106 / 0.1);
+
+  /* Warm light behind the product */
+  --warm-light: rgb(201 169 106 / 0.12);
+  --warm-core: rgb(224 189 121 / 0.1);
+
+  /* Veils and scrims */
+  --bg-veil: color-mix(in srgb, var(--bg) 74%, transparent);
+  --bg-scrim: color-mix(in srgb, var(--bg) 96%, transparent);
+  --bg-scrim-soft: color-mix(in srgb, var(--bg) 62%, transparent);
+
+  /* Cursor */
+  --cursor: rgb(242 237 228 / 0.65);
+
+  /* Typefaces — bound to the next/font variables in app/layout.tsx */
+  --font-serif-family: var(--font-cormorant), "Cormorant Garamond", Georgia,
+    "Times New Roman", serif;
+  --font-sans-family: var(--font-inter), "Inter", system-ui, -apple-system,
+    "Segoe UI", sans-serif;
+
+  /* Rhythm */
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --gutter: 8vw;
 }
 
+/* Tailwind v4 configuration — maps the tokens above onto utilities. */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--bg);
+  --color-bg-2: var(--bg-2);
+  --color-ivory: var(--ivory);
+  --color-gold: var(--gold);
+  --color-gold-light: var(--gold-light);
+  --color-gold-deep: var(--gold-deep);
+  --color-gold-muted: var(--gold-muted);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-line: var(--line);
+  --color-line-soft: var(--line-soft);
+
+  --font-serif: var(--font-serif-family);
+  --font-sans: var(--font-sans-family);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ==========================================================================
+   BASE
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: auto;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Lenis owns the scroll position while it is mounted. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans-family);
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--gold);
+  color: var(--bg);
+}
+
+::-webkit-scrollbar {
+  width: 3px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--line);
+}
+
+:focus-visible {
+  outline: 1px solid var(--gold);
+  outline-offset: 3px;
+}
+
+/* ==========================================================================
+   TYPOGRAPHY
+   ========================================================================== */
+
+/* Display / headlines — Cormorant Garamond, never bold, never all-caps */
+.headline {
+  font-family: var(--font-serif-family);
+  font-weight: 300;
+  font-size: clamp(3rem, 8vw, 7.5rem);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  color: var(--ivory);
+  text-wrap: balance;
+}
+
+/* Story beats — large, but held clear of the product */
+.headline--beat {
+  font-size: clamp(2.5rem, 5vw, 5rem);
+  line-height: 1.04;
+}
+
+/* Post-sequence section heads */
+.headline--section {
+  font-size: clamp(2.2rem, 4.4vw, 4.25rem);
+  line-height: 1.06;
+}
+
+/* The single italic accent allowed inside a headline */
+.headline-italic-gold {
+  font-style: italic;
+  font-weight: 400;
+  color: var(--gold-light);
+}
+
+/* Body copy — Inter 300, generous leading, narrow measure */
+.body-text {
+  font-family: var(--font-sans-family);
+  font-weight: 300;
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--text-muted);
+  max-width: 34ch;
+}
+
+@media (min-width: 768px) {
+  .body-text {
+    font-size: 16px;
+  }
+}
+
+/* Eyebrow labels */
+.eyebrow {
+  font-family: var(--font-sans-family);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+/* Chapter marker */
+.chapter {
+  font-family: var(--font-sans-family);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.28em;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Eyebrow block — hairline above, marker, then label */
+.eyebrow-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.eyebrow-block__rule {
+  display: block;
+  width: 48px;
+  height: 1px;
+  background: var(--gold);
+  opacity: 0.75;
+}
+
+/* Editorial numerals — muted gold */
+.numeral {
+  font-family: var(--font-serif-family);
+  font-weight: 300;
+  font-size: clamp(1.75rem, 2.6vw, 2.5rem);
+  line-height: 1;
+  color: var(--gold-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ==========================================================================
+   BUTTONS & LINKS
+   ========================================================================== */
+
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 1px solid var(--gold);
+  border-radius: 2px;
+  background: transparent;
+  color: var(--ivory);
+  font-family: var(--font-sans-family);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 18px 42px;
+  cursor: pointer;
+  transition:
+    background-color 500ms var(--ease),
+    color 500ms var(--ease),
+    border-color 500ms var(--ease);
+}
+
+.btn-outline:hover {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--bg);
+}
+
+.btn-outline--sm {
+  padding: 11px 24px;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+}
+
+/* Secondary link — animated underline */
+.link-underline {
+  position: relative;
+  display: inline-block;
+  color: var(--text-muted);
+  font-family: var(--font-sans-family);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transition: color 400ms var(--ease);
+}
+
+.link-underline::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right center;
+  transition: transform 500ms var(--ease);
+}
+
+.link-underline:hover {
+  color: var(--ivory);
+}
+
+.link-underline:hover::after {
+  transform: scaleX(1);
+  transform-origin: left center;
+}
+
+/* Wordmark */
+.wordmark {
+  font-family: var(--font-serif-family);
+  font-weight: 400;
+  font-size: 15px;
+  letter-spacing: 0.2em;
+  color: var(--ivory);
+}
+
+/* Navigation link */
+.nav-link {
+  font-family: var(--font-sans-family);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  transition: color 400ms var(--ease);
+}
+
+.nav-link:hover {
+  color: var(--ivory);
+}
+
+/* ==========================================================================
+   ATMOSPHERE
+   ========================================================================== */
+
+/* Film grain — fixed, non-interactive */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+}
+
+/* Custom cursor — desktop pointers only */
+.cursor-outer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 90;
+}
+
+.cursor-ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border: 1px solid var(--cursor);
+  border-radius: 50%;
+  transition:
+    width 400ms var(--ease),
+    height 400ms var(--ease),
+    margin 400ms var(--ease),
+    border-color 400ms var(--ease),
+    opacity 400ms var(--ease);
+  opacity: 0.75;
+}
+
+.cursor-ring[data-active="true"] {
+  width: 26px;
+  height: 26px;
+  margin: -13px 0 0 -13px;
+  border-color: var(--gold);
+  opacity: 1;
+}
+
+html.has-custom-cursor,
+html.has-custom-cursor * {
+  cursor: none;
+}
+
+/* Masked reveal — a little room below the baseline for descenders */
+.mask {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.14em;
+  margin-bottom: -0.14em;
+}
+
+/* Hairline rule */
+.rule {
+  display: block;
+  width: 100%;
+  height: 1px;
+  background: var(--line);
+}
+
+/* ==========================================================================
+   REDUCED MOTION
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
