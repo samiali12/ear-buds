@@ -139,9 +139,8 @@ export default function StoryBeats({
 }) {
   const heroOpacity = useTransform(progress, [0, 0.07, 0.11], [1, 1, 0]);
 
-  // Hero text perspective transforms
-  const heroRotateY = useTransform(progress, [0, 0.05], [TEXT_ROTATE_Y_ENTER, 0]);
-  const heroTranslateZ = useTransform(progress, [0, 0.05], [TEXT_TRANSLATE_Z_ENTER, 0]);
+  // Hero text perspective transforms - reduced for sharper text
+  const heroRotateY = useTransform(progress, [0, 0.05], [1.5, 0]);
 
   return (
     <div className="pointer-events-none absolute inset-0">
@@ -150,15 +149,13 @@ export default function StoryBeats({
         className="absolute inset-0 flex flex-col items-center justify-center px-[8vw]"
         style={{
           opacity: heroOpacity,
-          transformStyle: "preserve-3d",
         }}
       >
         <motion.div
           className="text-center"
           style={{
             rotateY: heroRotateY,
-            translateZ: heroTranslateZ,
-            transformStyle: "preserve-3d",
+            backfaceVisibility: "hidden" as const,
           }}
         >
           <MaskedLine active={ready} delay={0}>

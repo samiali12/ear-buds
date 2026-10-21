@@ -480,13 +480,50 @@ export default function ScrollSequence({ ready = false }: ScrollSequenceProps) {
     };
   }, [scrollYProgress, smoothProgress, drawFrame, drawReflection, prefersReducedMotion]);
 
-  // Initial draw
+  // Initial draw - start from exploded view (near end frames) for hero effect
+  const [initialFrameSet, setInitialFrameSet] = useState(false);
+
   useEffect(() => {
-    if (!prefersReducedMotion && framesLoaded) {
-      drawFrame(0);
-      drawReflection(0);
+    if (!prefersReducedMotion && framesLoaded && !initialFrameSet) {
+      setInitialFrameSet(true);
+
+      const totalFrames = isMobile ? Math.min(FRAME_COUNT, 60) : FRAME_COUNT;
+      const startFrame = Math.floor(totalFrames * 0.85); // Start at 85%
+      const endFrame = totalFrames - 1;
+
+      // Start at exploded view
+      drawFrame(startFrame);
+      drawReflection(startFrame);
+
+      // Animate to last frame then back (exploded → fully exploded → reverse)
+      let frame = startFrame;
+      const animateExploded = () => {
+        frame++;
+        if (frame <= endFrame) {
+          drawFrame(frame);
+          drawReflection(frame);
+          requestAnimationFrame(animateExploded);
+        } else {
+          // Then reverse back through frames for full effect
+          let reverseFrame = endFrame;
+          const reverseAnim = () => {
+            reverseFrame--;
+            if (reverseFrame >= 0) {
+              drawFrame(reverseFrame);
+              drawReflection(reverseFrame);
+              requestAnimationFrame(reverseAnim);
+            }
+          };
+          // Faster on mobile
+          const delay = isMobile ? 150 : 300;
+          setTimeout(() => requestAnimationFrame(reverseAnim), delay);
+        }
+      };
+      // Faster animation on mobile
+      const delay = isMobile ? 200 : 400;
+      setTimeout(() => requestAnimationFrame(animateExploded), delay);
     }
-  }, [drawFrame, drawReflection, framesLoaded, prefersReducedMotion]);
+  }, [drawFrame, drawReflection, framesLoaded, prefersReducedMotion, initialFrameSet, isMobile]);
 
   if (prefersReducedMotion) {
     return (
