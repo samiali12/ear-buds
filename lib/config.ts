@@ -40,12 +40,27 @@ export const STAGE_TOP_DESKTOP = 76;
 export const STAGE_TOP_MOBILE = 64;
 
 /**
+ * Where the product sits inside the stage, as a share of the space that is
+ * left over. A half on a wide screen, higher up on a phone.
+ */
+export const STAGE_BIAS_DESKTOP = 0.5;
+export const STAGE_BIAS_MOBILE = 0.22;
+
+/**
  * Where the product sits inside a frame, as a fraction of the frame height.
  * The widest extent is used so that the earbuds are never cropped, whatever
  * the frame does.
  */
 export const FRAME_PRODUCT_TOP = 0.03;
 export const FRAME_PRODUCT_BOTTOM = 0.94;
+
+/** The same, across the width of a frame. */
+export const FRAME_PRODUCT_LEFT = 0.11;
+export const FRAME_PRODUCT_RIGHT = 0.89;
+
+/** The air kept either side of the product on a phone. */
+export const STAGE_MARGIN_MOBILE = 12;
+export const STAGE_MARGIN_DESKTOP = 0;
 
 /* Motion */
 export const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];

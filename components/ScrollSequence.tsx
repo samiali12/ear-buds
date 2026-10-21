@@ -14,10 +14,16 @@ import {
   FRAME_PATH,
   FRAME_PATH_MOBILE,
   FRAME_PRODUCT_BOTTOM,
+  FRAME_PRODUCT_LEFT,
+  FRAME_PRODUCT_RIGHT,
   FRAME_PRODUCT_TOP,
   MOBILE_BREAKPOINT,
   STAGE_BAND_DESKTOP,
   STAGE_BAND_MOBILE,
+  STAGE_BIAS_DESKTOP,
+  STAGE_BIAS_MOBILE,
+  STAGE_MARGIN_DESKTOP,
+  STAGE_MARGIN_MOBILE,
   STAGE_TOP_DESKTOP,
   STAGE_TOP_MOBILE,
 } from "@/lib/config";
@@ -161,26 +167,30 @@ export default function ScrollSequence({ ready = false }: ScrollSequenceProps) {
         .trim();
       ctx.fillStyle = surface;
       ctx.fillRect(0, 0, rect.width, rect.height);
-
       // The frames are drawn as large as the stage allows, so the product
-      // fills the space between the navigation bar and the type band. The
-      // empty margins of a frame are what gets cropped, never the product.
+      // fills the space between the navigation bar and the type band. Only
+      // the empty margins of a frame are ever cropped, never the earbuds.
       const frameAspect = frame.width / frame.height;
       const productRatio = FRAME_PRODUCT_BOTTOM - FRAME_PRODUCT_TOP;
-      const frameHeight = Math.min(
-        stageHeight / productRatio,
-        rect.width / frameAspect
-      );
-      const frameWidth = frameHeight * frameAspect;
+      const productWidth = FRAME_PRODUCT_RIGHT - FRAME_PRODUCT_LEFT;
+      const bias = isMobile ? STAGE_BIAS_MOBILE : STAGE_BIAS_DESKTOP;
+      const margin = isMobile ? STAGE_MARGIN_MOBILE : STAGE_MARGIN_DESKTOP;
+
+      const fitWidth = (rect.width - margin * 2) / productWidth;
+      const fitHeight = (stageHeight / productRatio) * frameAspect;
+      const frameWidth = Math.min(fitWidth, fitHeight);
+      const frameHeight = frameWidth / frameAspect;
 
       const productHeight = frameHeight * productRatio;
       const offsetX = (rect.width - frameWidth) / 2;
       const offsetY =
-        top + (stageHeight - productHeight) / 2 - FRAME_PRODUCT_TOP * frameHeight;
+        top +
+        (stageHeight - productHeight) * bias -
+        FRAME_PRODUCT_TOP * frameHeight;
 
       ctx.drawImage(frame, offsetX, offsetY, frameWidth, frameHeight);
     },
-    [getStageRect]
+    [getStageRect, isMobile]
   );
 
   // Handle resize and orientation change
