@@ -9,11 +9,17 @@ import {
 } from "framer-motion";
 import { BEATS, parseHeadline, type Beat } from "@/lib/story";
 import { PRODUCT_NAME, TAGLINE, EASE } from "@/lib/config";
+import {
+  TEXT_ROTATE_Y_ENTER,
+  TEXT_TRANSLATE_Z_ENTER,
+  EASE_LUXURY_CSS,
+} from "@/lib/motion";
 import { MaskedLine } from "./Reveal";
 import Eyebrow from "./Eyebrow";
 import OutlineButton from "./Button";
 
 /**
+ * Story beats with masked reveal.
  * The masked reveal starts once the beat is genuinely on screen and resets
  * only when it has faded out of sight.
  */
@@ -35,10 +41,12 @@ function BeatBlock({
   beat,
   progress,
   ready,
+  textParallaxX,
 }: {
   beat: Beat;
   progress: MotionValue<number>;
   ready: boolean;
+  textParallaxX?: MotionValue<number>;
 }) {
   const [start, end] = beat.range;
   const opacity = useTransform(
@@ -46,9 +54,46 @@ function BeatBlock({
     [start, start + 0.035, end - 0.035, end],
     [0, 1, 1, 0]
   );
+
+  // Perspective transforms for entry
+  const rotateY = useTransform(
+    progress,
+    [start, start + 0.05],
+    [TEXT_ROTATE_Y_ENTER, 0]
+  );
+  const translateZ = useTransform(
+    progress,
+    [start, start + 0.05],
+    [TEXT_TRANSLATE_Z_ENTER, 0]
+  );
+
+  // Perspective transforms for exit
+  const rotateYExit = useTransform(
+    progress,
+    [end - 0.05, end],
+    [0, -TEXT_ROTATE_Y_ENTER]
+  );
+  const translateZExit = useTransform(
+    progress,
+    [end - 0.05, end],
+    [0, TEXT_TRANSLATE_Z_ENTER * 0.5]
+  );
+
   const revealed = useBeatReveal(opacity);
   const isRight = beat.align === "right";
   const { before, accent, after } = parseHeadline(beat.headline);
+
+  // Determine which rotation to use based on position in scroll
+  const currentRotateY = useTransform(
+    progress,
+    [start, start + 0.05, end - 0.05, end],
+    [TEXT_ROTATE_Y_ENTER, 0, 0, -TEXT_ROTATE_Y_ENTER]
+  );
+  const currentTranslateZ = useTransform(
+    progress,
+    [start, start + 0.05, end - 0.05, end],
+    [TEXT_TRANSLATE_Z_ENTER, 0, 0, TEXT_TRANSLATE_Z_ENTER * 0.5]
+  );
 
   return (
     <motion.div
@@ -57,13 +102,22 @@ function BeatBlock({
         "md:inset-x-auto md:bottom-auto md:top-1/2 md:-translate-y-1/2",
         isRight ? "md:left-auto md:right-[8vw]" : "md:left-[8vw] md:right-auto",
       ].join(" ")}
-      style={{ opacity }}
+      style={{
+        opacity,
+        x: textParallaxX,
+        transformStyle: "preserve-3d",
+      }}
     >
-      <div
+      <motion.div
         className={[
           "w-full md:w-[30ch]",
           isRight ? "md:ml-auto md:text-right" : "",
         ].join(" ")}
+        style={{
+          rotateY: currentRotateY,
+          translateZ: currentTranslateZ,
+          transformStyle: "preserve-3d",
+        }}
       >
         <Eyebrow
           chapter={beat.chapter}
@@ -93,7 +147,7 @@ function BeatBlock({
             </div>
           </MaskedLine>
         ) : null}
-      </div>
+      </motion.div>
     </motion.div>
   );
 }
@@ -101,20 +155,36 @@ function BeatBlock({
 export default function StoryBeats({
   progress,
   ready,
+  textParallaxX,
 }: {
   progress: MotionValue<number>;
   ready: boolean;
+  textParallaxX?: MotionValue<number>;
 }) {
   const heroOpacity = useTransform(progress, [0, 0.07, 0.11], [1, 1, 0]);
+
+  // Hero text perspective transforms
+  const heroRotateY = useTransform(progress, [0, 0.05], [TEXT_ROTATE_Y_ENTER, 0]);
+  const heroTranslateZ = useTransform(progress, [0, 0.05], [TEXT_TRANSLATE_Z_ENTER, 0]);
 
   return (
     <div className="pointer-events-none absolute inset-0">
       {/* Hero */}
       <motion.div
         className="absolute inset-0 flex flex-col items-center justify-center px-[8vw]"
-        style={{ opacity: heroOpacity }}
+        style={{
+          opacity: heroOpacity,
+          transformStyle: "preserve-3d",
+        }}
       >
-        <div className="text-center">
+        <motion.div
+          className="text-center"
+          style={{
+            rotateY: heroRotateY,
+            translateZ: heroTranslateZ,
+            transformStyle: "preserve-3d",
+          }}
+        >
           <MaskedLine active={ready} delay={0}>
             <h1 className="headline">{PRODUCT_NAME}</h1>
           </MaskedLine>
@@ -126,7 +196,7 @@ export default function StoryBeats({
               {TAGLINE}
             </p>
           </MaskedLine>
-        </div>
+        </motion.div>
 
         {/* Scroll indicator */}
         <div className="absolute bottom-12 left-1/2 -translate-x-1/2 md:bottom-16">
@@ -142,7 +212,13 @@ export default function StoryBeats({
 
       {/* Chaptered beats */}
       {BEATS.map((beat) => (
-        <BeatBlock key={beat.id} beat={beat} progress={progress} ready={ready} />
+        <BeatBlock
+          key={beat.id}
+          beat={beat}
+          progress={progress}
+          ready={ready}
+          textParallaxX={textParallaxX}
+        />
       ))}
     </div>
   );

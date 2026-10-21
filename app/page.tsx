@@ -4,6 +4,7 @@ import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Loader from "@/components/Loader";
 import ScrollSequence from "@/components/ScrollSequence";
+import Turntable from "@/components/Turntable";
 import Features from "@/components/Features";
 import Specs from "@/components/Specs";
 import FinalCTA from "@/components/FinalCTA";
@@ -27,7 +28,7 @@ export default function Home() {
 
       <main style={{ background: "var(--bg)" }}>
         <ScrollSequence ready={ready} />
-
+        <Turntable />
         <Features />
         <Specs />
         <FinalCTA />

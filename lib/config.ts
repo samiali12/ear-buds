@@ -34,5 +34,8 @@ export const EASE_CSS = "cubic-bezier(0.16, 1, 0.3, 1)";
 export const REVEAL_DURATION = 1.2;
 export const REVEAL_STAGGER = 0.08;
 
+/* 360 turntable */
+export const SPIN_FRAME_COUNT = 72;
+
 /* Layout */
 export const SIDE_MARGIN = "8vw";
